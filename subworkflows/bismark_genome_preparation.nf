@@ -2,7 +2,6 @@
 
 // Import modules
 include { BISMARK_PREPARE_FOLDERS } from '../modules/local/bismark_prepare_folders'
-include { CREATE_CONVERSION_SCRIPT } from '../modules/local/bismark_convert_genome'
 include { BISMARK_CONVERT_GENOME } from '../modules/local/bismark_convert_genome'
 include { BISMARK_INDEX_GENOME } from '../modules/local/bismark_index_genome'
 
@@ -24,7 +23,7 @@ workflow BISMARK_GENOME_PREPARATION_WF {
         genome_dir,
         BISMARK_PREPARE_FOLDERS.out.bisulfite_dir,
         !params.single_fasta,  // multi_fasta is the inverse of single_fasta
-        params.slam
+        params.slam,
     )
     
     // Step 4: Index the converted genomes

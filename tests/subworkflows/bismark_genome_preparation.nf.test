@@ -1,0 +1,91 @@
+nextflow_workflow {
+
+    name "Test BISMARK_GENOME_PREPARATION_WF subworkflow"
+    script "subworkflows/bismark_genome_preparation.nf"
+    workflow "BISMARK_GENOME_PREPARATION_WF"
+    config "tests/config/nextflow.config"
+
+    test("Should prepare bisulfite genome with default parameters") {
+        when {
+            workflow {
+                """
+                // Define inputs for the workflow
+                input[0] = file("${params.test_data_dir}")
+                input[1] = params.aligner
+                """
+            }
+        }
+
+        then {
+            // Test that the workflow completed successfully
+            assert workflow.success
+            
+            // Test that the output channel contains the expected bisulfite genome directory
+            assert workflow.out.bisulfite_genome != null
+            
+            // Check that the output directory has the expected structure
+            with(workflow.out.bisulfite_genome) {
+                assert get(0).exists()
+                
+                // Check for CT conversion directory
+                assert path(get(0) + "/CT_conversion").exists()
+                
+                // Check for GA conversion directory
+                assert path(get(0) + "/GA_conversion").exists()
+                
+                // Check for bowtie2 index files in CT conversion directory
+                def ct_files = path(get(0) + "/CT_conversion").list()
+                assert ct_files.any { it.toString().contains("BS_CT") }
+                
+                // Check for bowtie2 index files in GA conversion directory
+                def ga_files = path(get(0) + "/GA_conversion").list()
+                assert ga_files.any { it.toString().contains("BS_GA") }
+            }
+        }
+    }
+    
+    test("Should prepare bisulfite genome with single_fasta option") {
+        when {
+            params {
+                single_fasta = true
+            }
+            
+            workflow {
+                """
+                // Define inputs for the workflow
+                input[0] = file("${params.test_data_dir}")
+                input[1] = params.aligner
+                """
+            }
+        }
+
+        then {
+            // Test that the workflow completed successfully
+            assert workflow.success
+            
+            // Test that the output channel contains the expected bisulfite genome directory
+            assert workflow.out.bisulfite_genome != null
+            
+            // Check that the output follows the single_fasta structure (individual fasta files)
+            with(workflow.out.bisulfite_genome) {
+                assert get(0).exists()
+                
+                // Check for CT conversion directory
+                def ct_dir = path(get(0) + "/CT_conversion")
+                assert ct_dir.exists()
+                
+                // Check for individual .fa files in CT directory
+                def ct_files = ct_dir.list()
+                assert ct_files.count { it.toString().endsWith(".fa") || it.toString().contains("CT_conversion") } > 0
+                
+                // Check for GA conversion directory
+                def ga_dir = path(get(0) + "/GA_conversion") 
+                assert ga_dir.exists()
+                
+                // Check for individual .fa files in GA directory
+                def ga_files = ga_dir.list()
+                assert ga_files.count { it.toString().endsWith(".fa") || it.toString().contains("GA_conversion") } > 0
+            }
+        }
+    }
+} 
