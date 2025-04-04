@@ -1,1 +1,5 @@
 .cache
+.nextflow*
+work/
+results/
+.nf-test*

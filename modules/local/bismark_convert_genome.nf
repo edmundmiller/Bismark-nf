@@ -1,9 +1,8 @@
 process BISMARK_CONVERT_GENOME {
-    tag "Convert ${genome_dir.getName()}"
+    tag "${fasta.getName()}"
 
     input:
-    path genome_dir
-    path bisulfite_dir
+    path fasta
     val multi_fasta
     val slam
 
@@ -16,11 +15,10 @@ process BISMARK_CONVERT_GENOME {
 
     """
     # Copy the bisulfite directory structure
-    cp -r ${bisulfite_dir}/* .
     
     # Run the conversion script
     bismark_genome_conversion.pl \\
-        --genome_folder ${genome_dir} \\
+        --genome_folder ${fasta} \\
         --output_dir Bisulfite_Genome \\
         --multi_fasta ${use_multi_fasta} \\
         --slam ${is_slam}

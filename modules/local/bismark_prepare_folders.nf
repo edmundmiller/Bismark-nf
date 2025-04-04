@@ -1,12 +1,12 @@
 process BISMARK_PREPARE_FOLDERS {
-    tag "Prepare folders for ${genome_dir.getName()}"
+    tag "${fasta.getName()}"
     
     input:
-    path genome_dir
+    path fasta
     
     output:
     path "Bisulfite_Genome", emit: bisulfite_dir
-    
+
     script:
     """
     # Create the main Bisulfite_Genome directory
