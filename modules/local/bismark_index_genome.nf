@@ -1,5 +1,6 @@
 process BISMARK_INDEX_GENOME {
     tag "Index ${bisulfite_dir.getName()} with ${aligner}"
+    conda "bowtie2" // TODO Add hisat2 and others
     
     input:
     path bisulfite_dir

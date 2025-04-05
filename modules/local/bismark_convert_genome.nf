@@ -1,5 +1,6 @@
 process BISMARK_CONVERT_GENOME {
     tag "${fasta.getName()}"
+    conda "perl"
 
     input:
     path fasta
