@@ -14,14 +14,15 @@ process BISMARK_CONVERT_GENOME {
     def is_slam = slam ? "true" : "false"
 
     """
-    # Copy the bisulfite directory structure
+    # Create the output directory
+    mkdir -p Bisulfite_Genome
     
-    # Run the conversion script
+    # Run the conversion script with appropriate file path handling
     bismark_genome_conversion.pl \\
-        --genome_folder ${fasta} \\
-        --output_dir Bisulfite_Genome \\
-        --multi_fasta ${use_multi_fasta} \\
-        --slam ${is_slam}
+        --genome_folder="\$PWD/${fasta}" \\
+        --output_dir="Bisulfite_Genome" \\
+        --multi_fasta=${use_multi_fasta} \\
+        --slam=${is_slam}
     
     echo "Bisulfite genome conversion completed successfully"
     """
