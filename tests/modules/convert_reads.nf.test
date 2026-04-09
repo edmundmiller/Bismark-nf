@@ -19,10 +19,9 @@ nextflow_process {
         then {
             assert process.success
 
-            // BUG: cat on .gz feeds binary to awk, output is garbage not FASTQ
             def c2t = path(process.out.c2t_reads[0][1][0])
             def firstByte = c2t.bytes[0]
-            assert firstByte != (byte) 0x40 // BUG: first byte should be '@' (0x40) for valid FASTQ
+            assert firstByte == (byte) 0x40 // '@' = valid FASTQ header
         }
     }
 }
