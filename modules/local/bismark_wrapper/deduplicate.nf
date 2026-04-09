@@ -13,16 +13,8 @@ process DEDUPLICATE_BISMARK {
     tuple val(meta), path("*.deduplication_report.txt"), emit: report
 
     script:
-    def args = task.ext.args ?: ''
     def endedness = meta.single_end ? '--single' : '--paired'
-    def barcode = params.barcode ? '--barcode' : ''
     """
-    deduplicate_bismark \\
-        ${endedness} \\
-        --bam \\
-        --output_dir . \\
-        ${barcode} \\
-        ${args} \\
-        ${bam}
+    deduplicate_bismark ${endedness} --bam --output_dir . ${bam}
     """
 }
