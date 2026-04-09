@@ -33,10 +33,9 @@ nextflow_workflow {
         }
 
         then {
-            // BUG: subworkflow crashes — tuple passed where path expected,
-            // container image missing, CIGAR format wrong, chrom names don't
-            // match genome, XR/XG tags missing/wrong
-            assert workflow.failed // BUG: should succeed once fixed
+            assert workflow.success
+            assert workflow.out.bam
+            assert workflow.out.report
         }
     }
 }

@@ -29,15 +29,21 @@ workflow BISMARK_ALIGNMENT_NATIVE {
     )
     
     // 3. Merge alignment results and perform methylation calling
+    ch_c2t = ALIGN_C2T.out.sam
+    ch_g2a = ALIGN_G2A.out.sam.map { meta, sam -> sam }
+
     MERGE_ALIGNMENTS (
-        ALIGN_C2T.out.sam,
-        ALIGN_G2A.out.sam,
+        ch_c2t,
+        ch_g2a,
         fasta,
         directional
     )
-    
+
+    // Native alignment produces single-end-like BAM (R2 not properly paired)
+    ch_bam = MERGE_ALIGNMENTS.out.bam.map { meta, bam -> [[id: meta.id, single_end: true], bam] }
+
     emit:
-    bam      = MERGE_ALIGNMENTS.out.bam       // channel: [ val(meta), [ bam ] ]
+    bam      = ch_bam                         // channel: [ val(meta), [ bam ] ]
     report   = MERGE_ALIGNMENTS.out.report    // channel: [ val(meta), [ txt ] ]
     versions = ch_versions                   // channel: [ versions.yml ]
 } 

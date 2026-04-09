@@ -25,6 +25,9 @@ def parse_sam(sam_file, conversion_type):
             # Skip unmapped reads
             if chrom == '*' or flag & 4:
                 continue
+
+            # Strip conversion suffixes to get original chromosome name
+            chrom = chrom.replace('_CT_converted', '').replace('_GA_converted', '')
                 
             # Store alignment info
             if read_id not in alignments:
@@ -148,6 +151,8 @@ def load_genome(genome_fasta):
     
     return genome_dict
 
+CIGAR_OPS = {'M': 0, 'I': 1, 'D': 2, 'N': 3, 'S': 4, 'H': 5, 'P': 6, '=': 7, 'X': 8}
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Merge Bismark alignments and call methylation')
     parser.add_argument('--c2t_sam', required=True, help='C->T converted alignments SAM file')
@@ -226,9 +231,12 @@ def main():
                     a.reference_id = list(genome_dict.keys()).index(chrom)
                     a.reference_start = pos - 1  # 0-based
                     a.mapping_quality = mapq
-                    a.cigar = [(int(count), op) for count, op in re.findall(r'(\d+)([MIDNSHP=X])', cigar)]
+                    a.cigar = [(CIGAR_OPS[op], int(count)) for count, op in re.findall(r'(\d+)([MIDNSHP=X])', cigar)]
                     a.query_sequence = seq
-                    a.tags = [("XM", methyl_string), ("XR", conv_type)]
+                    # Bismark convention: c2t=OT (XR:CT,XG:CT), g2a=OB (XR:GA,XG:GA)
+                    xr_tag = "CT" if conv_type == "c2t" else "GA"
+                    xg_tag = "CT" if conv_type == "c2t" else "GA"
+                    a.tags = [("XM", methyl_string), ("XR", xr_tag), ("XG", xg_tag)]
                     
                     outfile.write(a)
             else:
