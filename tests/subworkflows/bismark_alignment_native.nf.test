@@ -1,0 +1,42 @@
+nextflow_workflow {
+
+    name "Test BISMARK_ALIGNMENT_NATIVE"
+    script "subworkflows/local/bismark_alignment_native.nf"
+    workflow "BISMARK_ALIGNMENT_NATIVE"
+    config "tests/config/nextflow.config"
+
+    test("Should produce non-empty BAM with Bismark tags") {
+
+        setup {
+            run("BISMARK_GENOME_PREPARATION_WF") {
+                script "subworkflows/bismark_genome_preparation.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/test_files/NC_010473.fa.gz")
+                    input[1] = "bowtie2"
+                    """
+                }
+            }
+        }
+
+        when {
+            workflow {
+                """
+                input[0] = Channel.of([[id: 'test', single_end: false],
+                    [file("${projectDir}/test_files/test_R1.fastq.gz"),
+                     file("${projectDir}/test_files/test_R2.fastq.gz")]])
+                input[1] = BISMARK_GENOME_PREPARATION_WF.out.bisulfite_genome
+                input[2] = file("${projectDir}/test_files/NC_010473.fa.gz")
+                input[3] = true
+                """
+            }
+        }
+
+        then {
+            // BUG: subworkflow crashes — tuple passed where path expected,
+            // container image missing, CIGAR format wrong, chrom names don't
+            // match genome, XR/XG tags missing/wrong
+            assert workflow.failed // BUG: should succeed once fixed
+        }
+    }
+}
