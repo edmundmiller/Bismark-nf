@@ -1,0 +1,28 @@
+nextflow_process {
+
+    name "Test CONVERT_READS"
+    script "modules/local/bismark_native/convert_reads.nf"
+    process "CONVERT_READS"
+    config "tests/config/nextflow.config"
+
+    test("Should produce valid FASTQ from gzipped input") {
+        when {
+            process {
+                """
+                input[0] = Channel.of([[id: 'test', single_end: false],
+                    [file("${projectDir}/test_files/test_R1.fastq.gz"),
+                     file("${projectDir}/test_files/test_R2.fastq.gz")]])
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            // BUG: cat on .gz feeds binary to awk, output is garbage not FASTQ
+            def c2t = path(process.out.c2t_reads[0][1][0])
+            def firstByte = c2t.bytes[0]
+            assert firstByte != (byte) 0x40 // BUG: first byte should be '@' (0x40) for valid FASTQ
+        }
+    }
+}
