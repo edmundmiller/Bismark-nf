@@ -9,9 +9,9 @@ process METHYLATION_EXTRACTOR {
     tuple val(meta), path(bam)
 
     output:
-    tuple val(meta), path("CpG_context_*.txt.gz"),   emit: cpg_calls
-    tuple val(meta), path("CHG_context_*.txt.gz"),   emit: chg_calls,  optional: true
-    tuple val(meta), path("CHH_context_*.txt.gz"),   emit: chh_calls,  optional: true
+    tuple val(meta), path("CpG_*.txt.gz"),             emit: cpg_calls
+    tuple val(meta), path("CHG_*.txt.gz"),             emit: chg_calls,  optional: true
+    tuple val(meta), path("CHH_*.txt.gz"),             emit: chh_calls,  optional: true
     tuple val(meta), path("*_splitting_report.txt"), emit: report
     tuple val(meta), path("*.M-bias.txt"),           emit: mbias
 

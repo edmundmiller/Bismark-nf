@@ -13,9 +13,7 @@ nextflow_pipeline {
         }
 
         then {
-            // BUG: extractor output glob CpG_context_* doesn't match
-            // per-strand filenames (CpG_OT_*, CpG_CTOB_*)
-            assert workflow.failed // BUG: should succeed once glob is fixed
+            assert workflow.success
         }
     }
 }
