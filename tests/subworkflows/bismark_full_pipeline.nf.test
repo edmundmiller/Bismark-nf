@@ -1,0 +1,19 @@
+nextflow_pipeline {
+
+    name "Test full Bismark pipeline"
+    script "main.nf"
+    config "tests/config/nextflow.config"
+
+    test("Should run genome prep through methylation extraction") {
+        when {
+            params {
+                fasta = "${projectDir}/test_files/NC_010473.fa.gz"
+                reads = "${projectDir}/test_files/*_R{1,2}.fastq.gz"
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+    }
+}

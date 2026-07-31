@@ -2,7 +2,7 @@ process CONVERT_READS {
     tag "${meta.id}"
     label 'process_medium'
     
-    conda "conda-forge::perl=5.26.2"
+    conda "conda-forge::coreutils"
     
     input:
     tuple val(meta), path(reads)
@@ -18,8 +18,7 @@ process CONVERT_READS {
     if (meta.single_end) {
         """
         # Convert C to T for forward alignment
-        cat ${reads[0]} | awk '
-        BEGIN { offset=0; }
+        zcat ${reads[0]} | awk '
         {
             if (NR % 4 == 2) {
                 gsub(/C/,"T");
@@ -28,8 +27,7 @@ process CONVERT_READS {
         }' > ${prefix}_c2t.fastq
         
         # Convert G to A for reverse alignment
-        cat ${reads[0]} | awk '
-        BEGIN { offset=0; }
+        zcat ${reads[0]} | awk '
         {
             if (NR % 4 == 2) {
                 gsub(/G/,"A");
@@ -40,8 +38,7 @@ process CONVERT_READS {
     } else {
         """
         # Convert read 1 (C to T)
-        cat ${reads[0]} | awk '
-        BEGIN { offset=0; }
+        zcat ${reads[0]} | awk '
         {
             if (NR % 4 == 2) {
                 gsub(/C/,"T");
@@ -50,29 +47,26 @@ process CONVERT_READS {
         }' > ${prefix}_1_c2t.fastq
         
         # Convert read 2 (G to A) for complementary strand
-        cat ${reads[1]} | awk '
-        BEGIN { offset=0; }
+        zcat ${reads[1]} | awk '
         {
             if (NR % 4 == 2) {
                 gsub(/G/,"A");
             }
             print \$0;
         }' > ${prefix}_2_g2a.fastq
-        
+
         # Also create reverse conversions for comprehensive alignment
         # Convert read 1 (G to A)
-        cat ${reads[0]} | awk '
-        BEGIN { offset=0; }
+        zcat ${reads[0]} | awk '
         {
             if (NR % 4 == 2) {
                 gsub(/G/,"A");
             }
             print \$0;
         }' > ${prefix}_1_g2a.fastq
-        
+
         # Convert read 2 (C to T)
-        cat ${reads[1]} | awk '
-        BEGIN { offset=0; }
+        zcat ${reads[1]} | awk '
         {
             if (NR % 4 == 2) {
                 gsub(/C/,"T");
